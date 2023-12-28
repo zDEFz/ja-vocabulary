@@ -121,14 +121,15 @@
         'おもしろい': 'interesting, amusing'
     };
 
-    let currentTerm;
-    let totalQuestions = Object.keys(termsAndDefinitions).length;
+    let terms = Object.keys(termsAndDefinitions);
+    let shuffledTerms = shuffleArray(terms);
+    let currentTermIndex = 0;
+    let totalQuestions = terms.length;
     let answeredQuestions = 0;
 
     function askQuestion() {
-        // Randomly select a term
-        const terms = Object.keys(termsAndDefinitions);
-        currentTerm = terms[Math.floor(Math.random() * terms.length)];
+        // Get the current term
+        const currentTerm = shuffledTerms[currentTermIndex];
 
         // Display the question
         const questionElement = document.getElementById('question');
@@ -140,11 +141,6 @@
         // Clear result container and input field
         document.getElementById('result-container').innerHTML = '';
         document.getElementById('definition').value = '';
-
-        // Check if all questions have been answered
-        if (answeredQuestions === totalQuestions) {
-            displaySuccessMessage();
-        }
     }
 
     function checkAnswer() {
@@ -152,13 +148,13 @@
         const userDefinition = document.getElementById('definition').value;
 
         // Check if the user's solution is correct (case-insensitive)
-        const isCorrect = termsAndDefinitions[currentTerm].toLowerCase() === userDefinition.toLowerCase();
+        const isCorrect = termsAndDefinitions[shuffledTerms[currentTermIndex]].toLowerCase() === userDefinition.toLowerCase();
 
         // Display the result
         const resultContainer = document.getElementById('result-container');
         const resultParagraph = document.createElement('p');
         resultParagraph.textContent = isCorrect
-            ? `Correct! Well done! The answer is: ${termsAndDefinitions[currentTerm]}`
+            ? `Correct! Well done! The answer is: ${termsAndDefinitions[shuffledTerms[currentTermIndex]]}`
             : 'Incorrect. Try again.';
 
         // Apply green text to the correct answer
@@ -177,7 +173,15 @@
 
         // Ask a new question if the answer is correct; otherwise, keep asking the same question after a delay
         if (isCorrect) {
-            setTimeout(askQuestion, 2000); // Wait for 2 seconds before asking the next question
+            // Move to the next term
+            currentTermIndex++;
+
+            // Check if all questions have been answered
+            if (currentTermIndex === totalQuestions) {
+                displaySuccessMessage();
+            } else {
+                setTimeout(askQuestion, 2000); // Wait for 2 seconds before asking the next question
+            }
         }
     }
 
@@ -201,6 +205,18 @@
             checkAnswer();
         }
     });
+
+    // Function to shuffle an array
+    function shuffleArray(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
 </script>
 
 </body>
