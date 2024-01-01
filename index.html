@@ -6,79 +6,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Japanese Vocabulary Training - Write Mode</title>
 
+
     <style>
         /* Your existing styles remain unchanged */
     </style>
 </head>
 
-<body>
+<h1>Japanese Vocabulary Training - Write Mode</h1>
+<p>Mode: <span id="mode">English => Hiragana</span></p>
+<button onclick="switchMode()">Switch Mode</button>
+<p>Write the translation based on the mode.</p>
 
-    <h1>Japanese Vocabulary Training - Write Mode</h1>
-    <p>Mode: <span id="mode">English => Hiragana</span></p>
-    <button onclick="switchMode()">Switch Mode</button>
-    <p>Write the translation based on the mode.</p>
+<div>
+    <p id="question"></p>
+    <label for="definition">Definition (English):</label>
+    <input type="text" id="definition" placeholder="Enter definition in English">
+    <button onclick="checkAnswer()">Check Answer</button>
+</div>
 
-    <div>
-        <p id="question"></p>
-        <label for="definition">Definition (English):</label>
-        <input type="text" id="definition" placeholder="Enter definition in English">
-        <button onclick="checkAnswer()">Check Answer</button>
-    </div>
+<div id="result-container"></div>
 
-    <div id="result-container"></div>
+<div id="counter">Progress: <span id="progress">0</span>/<span id="total">0</span></div>
 
-    <div id="counter">Progress: <span id="progress">0</span>/<span id="total">0</span></div>
+<div id="success-message">Congratulations! You've answered all questions correctly!</div>
 
-    <div id="success-message">Congratulations! You've answered all questions correctly!</div>
+<script>
+    let termsAndDefinitions;
 
-    <script>
-        let termsAndDefinitions;
-
-        // Load vocabulary terms from an external JSON file
-        fetch('path/to/vocabulary.json')
-            .then(response => response.json())
-            .then(data => {
-                termsAndDefinitions = data;
-                initializeQuiz();
-            })
-            .catch(error => console.error('Error loading vocabulary:', error));
-
-        let terms, shuffledTerms, currentTermIndex, totalQuestions, answeredQuestions, englishToHiraganaMode;
-
-        function initializeQuiz() {
-            terms = Object.keys(termsAndDefinitions);
-            shuffledTerms = shuffleArray(terms);
-            currentTermIndex = 0;
-            totalQuestions = terms.length;
-            answeredQuestions = 0;
-            englishToHiraganaMode = true;
-            askQuestion();
+    // Function to fetch JSON data from a URL
+    async function fetchVocabulary() {
+        try {
+            const response = await fetch('your_vocabulary_url.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            termsAndDefinitions = await response.json();
+            initializeQuiz();
+        } catch (error) {
+            console.error('Error loading vocabulary:', error);
         }
+    }
+
+    // Function to initialize the quiz after fetching the data
+    function initializeQuiz() {
+        let terms = Object.keys(termsAndDefinitions);
+        let shuffledTerms = shuffleArray(terms);
+        let currentTermIndex = 0;
+        let totalQuestions = terms.length;
+        let answeredQuestions = 0;
+        let englishToHiraganaMode = true;
+        let attempts = 0;
 
         function switchMode() {
             englishToHiraganaMode = !englishToHiraganaMode;
-            const modeElement = document.getElementById('mode');
-            modeElement.textContent = englishToHiraganaMode ? 'English => Hiragana' : 'Hiragana => English';
-
-            // Change the label and placeholder based on the mode
-            const definitionLabel = document.querySelector('label[for="definition"]');
-            const definitionInput = document.getElementById('definition');
-
-            if (englishToHiraganaMode) {
-                definitionLabel.textContent = 'Definition (English):';
-                definitionInput.placeholder = 'Enter definition in English';
-            } else {
-                definitionLabel.textContent = 'Definition (Japanese):';
-                definitionInput.placeholder = 'Enter definition in Japanese';
-            }
-
+            document.getElementById('mode').textContent = englishToHiraganaMode ? 'English => Hiragana' : 'Hiragana => English';
             resetQuiz();
         }
 
         function resetQuiz() {
+            terms = Object.keys(termsAndDefinitions);
             shuffledTerms = shuffleArray(terms);
             currentTermIndex = 0;
             answeredQuestions = 0;
+            attempts = 0;
             document.getElementById('success-message').style.display = 'none';
             askQuestion();
         }
@@ -86,7 +76,7 @@
         function askQuestion() {
             const currentTerm = shuffledTerms[currentTermIndex];
             const questionElement = document.getElementById('question');
-            
+
             if (englishToHiraganaMode) {
                 questionElement.textContent = `What is the translation from '${currentTerm}'?`;
             } else {
@@ -112,13 +102,16 @@
 
             const resultContainer = document.getElementById('result-container');
             const resultParagraph = document.createElement('p');
-            resultParagraph.textContent = isCorrect
-                ? `Correct! Well done! The answer is: ${englishToHiraganaMode ? termsAndDefinitions[shuffledTerms[currentTermIndex]] : shuffledTerms[currentTermIndex]}`
-                : `Incorrect. Try again. The correct answer is: ${englishToHiraganaMode ? termsAndDefinitions[shuffledTerms[currentTermIndex]] : shuffledTerms[currentTermIndex]}`;
 
             if (isCorrect) {
+                resultParagraph.textContent = `Correct! Well done! The answer is: ${englishToHiraganaMode ? termsAndDefinitions[shuffledTerms[currentTermIndex]] : shuffledTerms[currentTermIndex]}`;
                 resultParagraph.classList.add('correct-answer');
                 answeredQuestions++;
+                attempts = 0; // Reset attempts on correct answer
+            } else {
+                attempts++;
+                resultParagraph.textContent = `Incorrect. Try again (${attempts} attempt${attempts > 1 ? 's' : ''}). The correct answer is: ${englishToHiraganaMode ? termsAndDefinitions[shuffledTerms[currentTermIndex]] : shuffledTerms[currentTermIndex]}`;
+                resultParagraph.classList.add('incorrect-answer');
             }
 
             displayCounters();
@@ -127,10 +120,10 @@
 
             if (isCorrect) {
                 currentTermIndex++;
-                if (currentTermIndex === totalQuestions) {
-                    displaySuccessMessage();
-                } else {
+                if (currentTermIndex < totalQuestions) {
                     setTimeout(askQuestion, 2000);
+                } else {
+                    displaySuccessMessage();
                 }
             }
         }
@@ -155,7 +148,7 @@
         }
 
         // Initial question
-        initializeQuiz();
+        askQuestion();
 
         // Add event listener for the Enter key
         document.getElementById('definition').addEventListener('keydown', function (event) {
@@ -163,366 +156,12 @@
                 checkAnswer();
             }
         });
+    }
 
-    </script>
+    // Call the fetchVocabulary function to start the process
+    fetchVocabulary();
+</script>
 
 </body>
 
 </html>
-{
-'hill': '丘',
-'countryside': '田舎',
-'field': '畑',
-'flower': '花',
-'tree': '木',
-'leaf': '葉',
-'root': '根',
-'branch': '枝',
-'fruit': '果物',
-'seed': '種',
-'grass': '草',
-'sky': '空',
-'cloud': '雲',
-'sun': '太陽',
-'moon': '月',
-'star': '星',
-'rain': '雨',
-'snow': '雪',
-'wind': '風',
-'fire': '火',
-'water': '水',
-'earth': '地球',
-'stone': '石',
-'metal': '金属',
-'cloth': '布',
-'paper': '紙',
-'food': '食べ物',
-'drink': '飲み物',
-'meat': '肉',
-'vegetable': '野菜',
-'fruit': 'フルーツ',
-'dessert': 'デザート',
-'breakfast': '朝食',
-'lunch': '昼食',
-'dinner': '夕食',
-'cook': '料理する',
-'eat': '食べる',
-'drink': '飲む',
-'sleep': '寝る',
-'wake up': '目覚める',
-'work': '働く',
-'study': '勉強する',
-'read': '読む',
-'write': '書く',
-'draw': '描く',
-'listen': '聞く',
-'speak': '話す',
-'watch': '見る',
-'smile': '微笑む',
-'cry': '泣く',
-'laugh': '笑う',
-'love': '愛する',
-'hate': '嫌う',
-'feel': '感じる',
-'think': '考える',
-'know': '知る',
-'learn': '学ぶ',
-'teach': '教える',
-'understand': '理解する',
-'forget': '忘れる',
-'remember': '覚える',
-'create': '作る',
-'destroy': '壊す',
-'fix': '修理する',
-'buy': '買う',
-'sell': '売る',
-'give': '与える',
-'take': '取る',
-'find': '見つける',
-'lose': '失う',
-'win': '勝つ',
-'lose': '負ける',
-'fight': '戦う',
-'peace': '平和',
-'war': '戦争',
-'friendship': '友情',
-'enemy': '敵',
-'life': '生命',
-'death': '死',
-'time': '時間',
-'space': '空間',
-'world': '世界',
-'universe': '宇宙',
-'past': '過去',
-'present': '現在',
-'future': '未来',
-'beginning': '始まり',
-'end': '終わり',
-'first': '最初',
-'last': '最後',
-'next': '次',
-'previous': '前',
-'now': '今',
-'today': '今日',
-'tomorrow': '明日',
-'yesterday': '昨日',
-'morning': '朝',
-'afternoon': '午後',
-'evening': '夜',
-'night': '夜',
-'spring': '春',
-'summer': '夏',
-'autumn': '秋',
-'winter': '冬',
-'month': '月',
-'week': '週',
-'day': '日',
-'hour': '時間',
-'minute': '分',
-'second': '秒',
-'clock': '時計',
-'calendar': 'カレンダー',
-'birthday': '誕生日',
-'age': '年齢',
-'young': '若い',
-'old': '年老いた',
-'new': '新しい',
-'old': '古い',
-'good': '良い',
-'bad': '悪い',
-'beautiful': '美しい',
-'ugly': '醜い',
-'happy': '幸せ',
-'sad': '悲しい',
-'angry': '怒っている',
-'surprised': '驚いている',
-'bored': '退屈している',
-'excited': '興奮している',
-'tired': '疲れている',
-'healthy': '健康',
-'sick': '病気',
-'hot': '暑い',
-'cold': '寒い',
-'fast': '速い',
-'slow': '遅い',
-'big': '大きい',
-'small': '小さい',
-'tall': '高い',
-'short': '低い',
-'long': '長い',
-'short': '短い',
-'narrow': '狭い',
-'wide': '広い',
-'deep': '深い',
-'shallow': '浅い',
-'heavy': '重い',
-'light': '軽い',
-'hard': '硬い',
-'soft': '柔らかい',
-'smooth': '滑らか',
-'rough': '粗い',
-'dark': '暗い',
-'light': '明るい',
-'black': '黒い',
-'white': '白い',
-'red': '赤い',
-'blue': '青い',
-'green': '緑',
-'yellow': '黄色い',
-'orange': 'オレンジ色',
-'purple': '紫',
-'brown': '茶色',
-'gray': '灰色',
-'pink': 'ピンク',
-'gold': '金色',
-'silver': '銀色',
-'language': '言語',
-'word': '言葉',
-'letter': '文字',
-'number': '数字',
-'sentence': '文',
-'paragraph': '段落',
-'page': 'ページ',
-'book': '本',
-'newspaper': '新聞',
-'magazine': '雑誌',
-'radio': 'ラジオ',
-'television': 'テレビ',
-'internet': 'インターネット',
-'computer': 'コンピュータ',
-'smartphone': 'スマートフォン',
-'camera': 'カメラ',
-'movie': '映画',
-'music': '音楽',
-'song': '歌',
-'dance': '踊る',
-'art': '芸術',
-'painting': '絵画',
-'sculpture': '彫刻',
-'photography': '写真',
-'architecture': '建築',
-'fashion': 'ファッション',
-'sport': 'スポーツ',
-'game': 'ゲーム',
-'travel': '旅行',
-'adventure': '冒険',
-'hobby': '趣味',
-'play': '遊ぶ',
-'work': '仕事',
-'job': '職業',
-'career': 'キャリア',
-'boss': '上司',
-'employee': '従業員',
-'office': 'オフィス',
-'desk': 'デスク',
-'chair': '椅子',
-'computer': 'コンピュータ',
-'paper': '紙',
-'pen': 'ペン',
-'pencil': '鉛筆',
-'notebook': 'ノート',
-'meeting': '会議',
-'presentation': 'プレゼンテーション',
-'project': 'プロジェクト',
-'deadline': '締め切り',
-'break': '休憩',
-'lunch break': '昼休み',
-'vacation': '休暇',
-'holiday': '休日',
-'weekend': '週末',
-'salary': '給料',
-'pay': '支払う',
-'income': '収入',
-'expense': '費用',
-'save': '貯める',
-'spend': '使う',
-'invest': '投資する',
-'bank': '銀行',
-'account': '口座',
-'credit card': 'クレジットカード',
-'cash': '現金',
-'buy': '買う',
-'sell': '売る',
-'rent': '借りる',
-'loan': 'ローン',
-'tax': '税金',
-'budget': '予算',
-'start': '始める',
-'finish': '終える',
-'goal': '目標',
-'achievement': '達成',
-'success': '成功',
-'failure': '失敗',
-'problem': '問題',
-'solution': '解決',
-'idea': 'アイデア',
-'invention': '発明',
-'creativity': '創造性',
-'innovation': '革新',
-'change': '変化',
-'progress': '進歩',
-'growth': '成長',
-'development': '発展',
-'environment': '環境',
-'nature': '自然',
-'ecology': '生態学',
-'climate': '気候',
-'weather': '天気',
-'pollution': '汚染',
-'recycle': 'リサイクル',
-'energy': 'エネルギー',
-'technology': '技術',
-'science': '科学',
-'research': '研究',
-'experiment': '実験',
-'discovery': '発見',
-'knowledge': '知識',
-'wisdom': '知恵',
-'education': '教育',
-'school': '学校',
-'teacher': '教師',
-'student': '生徒',
-'classroom': '教室',
-'lesson': '授業',
-'learn': '学ぶ',
-'teach': '教える',
-'exam': '試験',
-'grade': '成績',
-'diploma': '卒業証書',
-'graduate': '卒業生',
-'undergraduate': '学部生',
-'graduate school': '大学院',
-'major': '専攻',
-'minor': '副専攻',
-'degree': '学位',
-'certificate': '証明書',
-'achievement': '業績',
-'language': '言語',
-'vocabulary': '語彙',
-'grammar': '文法',
-'sentence': '文',
-'paragraph': '段落',
-'essay': 'エッセイ',
-'poem': '詩',
-'novel': '小説',
-'story': '物語',
-'author': '著者',
-'writer': '作家',
-'reader': '読者',
-'bookstore': '本屋',
-'library': '図書館',
-'literature': '文学',
-'history': '歴史',
-'historian': '歴史家',
-'archaeology': '考古学',
-'artifact': '人工物',
-'museum': '博物館',
-'art': '芸術',
-'artist': '芸術家',
-'painting': '絵画',
-'sculpture': '彫刻',
-'music': '音楽',
-'musician': '音楽家',
-'instrument': '楽器',
-'song': '歌',
-'dance': '踊る',
-'theater': '劇場',
-'film': '映画',
-'movie': '映画',
-'actor': '俳優',
-'actress': '女優',
-'director': '監督',
-'producer': 'プロデューサー',
-'screenplay': '脚本',
-'camera': 'カメラ',
-'photography': '写真',
-'photo': '写真',
-'picture': '写真',
-'video': 'ビデオ',
-'animation': 'アニメーション',
-'cartoon': '漫画',
-'comic': 'コミック',
-'game': 'ゲーム',
-'sport': 'スポーツ',
-'athlete': 'アスリート',
-'team': 'チーム',
-'coach': 'コーチ',
-'stadium': 'スタジアム',
-'competition': '競争',
-'championship': '選手権',
-'Olympics': 'オリンピック',
-'travel': '旅行',
-'traveler': '旅行者',
-'tourist': '観光客',
-'trip': '旅',
-'adventure': '冒険',
-'explore': '探検する',
-'discover': '発見する',
-'journey': '旅行',
-'vacation': '休暇',
-'holiday': '休日',
-'weekend': '週末',
-'destination': '目的地',
-'guide': 'ガイド',
-'map': '地図'
-}
