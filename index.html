@@ -99,7 +99,17 @@
         let termsAndDefinitions;
         let englishToJapaneseMode = true; // Declare englishToJapaneseMode globally
 
-        // Move switchMode function outside initializeQuiz
+        // Move resetQuiz function outside initializeQuiz
+        function resetQuiz() {
+            terms = Object.keys(termsAndDefinitions);
+            shuffledTerms = shuffleArray(terms);
+            currentTermIndex = 0;
+            answeredQuestions = 0;
+            attempts = 0;
+            document.getElementById('success-message').style.display = 'none';
+            askQuestion();
+        }
+
         function switchMode() {
             englishToJapaneseMode = !englishToJapaneseMode;
             document.getElementById('mode').textContent = englishToJapaneseMode ? 'English => Japanese' : 'Japanese => English';
@@ -121,6 +131,8 @@
         }
 
         function initializeQuiz() {
+            // Your existing initializeQuiz function remains unchanged
+
             let terms = Object.keys(termsAndDefinitions);
             let shuffledTerms = shuffleArray(terms);
             let currentTermIndex = 0;
@@ -128,27 +140,18 @@
             let answeredQuestions = 0;
             let attempts = 0;
 
-            function shuffleArray(array) {
-                let currentIndex = array.length, randomIndex;
-                while (currentIndex !== 0) {
-                    randomIndex = Math.floor(Math.random() * currentIndex);
-                    currentIndex--;
-                    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-                }
-                return array;
-            }
-
-            function resetQuiz() {
-                terms = Object.keys(termsAndDefinitions);
-                shuffledTerms = shuffleArray(terms);
-                currentTermIndex = 0;
-                answeredQuestions = 0;
-                attempts = 0;
-                document.getElementById('success-message').style.display = 'none';
-                askQuestion();
-            }
-
             // Rest of your initializeQuiz function remains unchanged
+        }
+
+
+        function resetQuiz() {
+            terms = Object.keys(termsAndDefinitions);
+            shuffledTerms = shuffleArray(terms);
+            currentTermIndex = 0;
+            answeredQuestions = 0;
+            attempts = 0;
+            document.getElementById('success-message').style.display = 'none';
+            askQuestion();
         }
 
         // Rest of your script remains unchanged
