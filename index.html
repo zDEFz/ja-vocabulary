@@ -192,7 +192,8 @@
 
         async function fetchVocabulary(selectedVocabulary) {
             try {
-                const response = await fetch(`https://raw.githubusercontent.com/zDEFz/ja-vocabulary/main/vocab/json/${selectedVocabulary}/${selectedVocabulary}-basic-01.json`);
+                const response = await fetch('https://raw.githubusercontent.com/zDEFz/ja-vocabulary/main/vocab/json/en-japanese/01.json');
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
