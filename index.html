@@ -75,12 +75,14 @@
             display: none;
         }
     </style>
+
 </head>
 
-<h1>Japanese Vocabulary Training - Write Mode</h1>
-<p>Mode: <span id="mode">English => Japanese</span></p>
-<button onclick="switchMode()">Switch Mode</button>
-<p>Write the translation based on the mode.</p>
+<body>
+    <h1>Japanese Vocabulary Training - Write Mode</h1>
+    <p>Mode: <span id="mode">English => Japanese</span></p>
+    <button onclick="switchMode()">Switch Mode</button>
+    <p>Write the translation based on the mode.</p>
 
 <div>
     <p id="question"></p>
@@ -97,6 +99,13 @@
 
 <script>
     let termsAndDefinitions;
+
+     // Move switchMode function outside initializeQuiz
+     function switchMode() {
+            englishToJapaneseMode = !englishToJapaneseMode;
+            document.getElementById('mode').textContent = englishToJapaneseMode ? 'English => Japanese' : 'Japanese => English';
+            resetQuiz();
+        }
 
     async function fetchVocabulary() {
         try {
@@ -122,12 +131,6 @@
         let answeredQuestions = 0;
         let englishToJapaneseMode = true;
         let attempts = 0;
-
-        function switchMode() {
-            englishToJapaneseMode = !englishToJapaneseMode;
-            document.getElementById('mode').textContent = englishToJapaneseMode ? 'English => Japanese' : 'Japanese => English';
-            resetQuiz();
-        }
 
         function resetQuiz() {
             terms = Object.keys(termsAndDefinitions);
