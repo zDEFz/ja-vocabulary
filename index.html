@@ -84,7 +84,7 @@
 
     <div>
         <p id="question"></p>
-        <label for="definition">Definition (English):</label>
+        <label for="definition">Your Answer:</label>
         <input type="text" id="definition" placeholder="Enter definition in English">
         <button onclick="checkAnswer()">Check Answer</button>
     </div>
@@ -96,25 +96,114 @@
     <div id="success-message">Congratulations! You've answered all questions correctly!</div>
 
     <script>
+        let totalQuestions;
         let termsAndDefinitions;
         let englishToJapaneseMode = true; // Declare englishToJapaneseMode globally
+        let shuffledTerms; // Declare shuffledTerms globally
+        let currentTermIndex; // Declare currentTermIndex globally
+        let answeredQuestions; // Declare answeredQuestions globally
+        let attempts; // Declare attempts globally
 
-        // Move resetQuiz function outside initializeQuiz
-        function resetQuiz() {
-            terms = Object.keys(termsAndDefinitions);
-            shuffledTerms = shuffleArray(terms);
-            currentTermIndex = 0;
-            answeredQuestions = 0;
-            attempts = 0;
-            document.getElementById('success-message').style.display = 'none';
-            askQuestion();
+        // Move shuffleArray function to the global scope
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
         }
 
-        function switchMode() {
-            englishToJapaneseMode = !englishToJapaneseMode;
-            document.getElementById('mode').textContent = englishToJapaneseMode ? 'English => Japanese' : 'Japanese => English';
-            resetQuiz();
+        // Move askQuestion function to the global scope
+        function askQuestion() {
+            const currentTerm = shuffledTerms[currentTermIndex];
+            const questionElement = document.getElementById('question');
+
+            if (englishToJapaneseMode) {
+                questionElement.textContent = `What is the translation from '${currentTerm}'?`;
+            } else {
+                questionElement.textContent = `What is the translation to '${termsAndDefinitions[currentTerm]}'?`;
+            }
+
+            displayCounters();
+            document.getElementById('result-container').innerHTML = '';
+            document.getElementById('definition').value = '';
         }
+
+        // Move displayCounters function to the global scope
+        function displayCounters() {
+    document.getElementById('progress').textContent = answeredQuestions;
+    document.getElementById('total').textContent = totalQuestions;
+}
+
+
+    function resetQuiz() {
+    terms = Object.keys(termsAndDefinitions);
+    shuffledTerms = shuffleArray(terms);
+    currentTermIndex = 0;
+    answeredQuestions = 0;
+    attempts = 0;
+    totalQuestions = terms.length; // Update totalQuestions
+    document.getElementById('success-message').style.display = 'none';
+    askQuestion();
+}
+
+
+function switchMode() {
+    englishToJapaneseMode = !englishToJapaneseMode;
+    document.getElementById('mode').textContent = englishToJapaneseMode ? 'English => Japanese' : 'Japanese => English';
+    resetQuiz();
+}
+    
+function checkAnswer() {
+    const userDefinition = document.getElementById('definition').value;
+    let correctAnswer;
+
+    if (englishToJapaneseMode) {
+        correctAnswer = termsAndDefinitions[shuffledTerms[currentTermIndex]].toLowerCase();
+    } else {
+        correctAnswer = shuffledTerms[currentTermIndex].toLowerCase();
+    }
+
+    const isCorrect = userDefinition.toLowerCase() === correctAnswer;
+
+    const resultContainer = document.getElementById('result-container');
+    const resultParagraph = document.createElement('p');
+
+    if (isCorrect) {
+        // Increment answeredQuestions only on correct answer
+        answeredQuestions++;
+
+        resultParagraph.textContent = `Correct! Well done! The answer is: ${englishToJapaneseMode ? termsAndDefinitions[shuffledTerms[currentTermIndex]] : shuffledTerms[currentTermIndex]}`;
+        resultParagraph.classList.add('correct-answer');
+        attempts = 0; // Reset attempts on correct answer
+
+        currentTermIndex++;
+        if (currentTermIndex < totalQuestions) {
+            setTimeout(askQuestion, 2000);
+        } else {
+            displaySuccessMessage();
+        }
+    } else {
+        attempts++;
+        resultParagraph.textContent = `Incorrect. Try again (${attempts} attempt${attempts > 1 ? 's' : ''}). The correct answer is: ${englishToJapaneseMode ? termsAndDefinitions[shuffledTerms[currentTermIndex]] : shuffledTerms[currentTermIndex]}`;
+        resultParagraph.classList.add('incorrect-answer');
+    }
+
+    resultContainer.innerHTML = '';
+    resultContainer.appendChild(resultParagraph);
+
+    // Update counters after processing the answer
+    displayCounters();
+}
+
+
+
+
+
+
+
 
         async function fetchVocabulary() {
             try {
@@ -130,31 +219,52 @@
             }
         }
 
-        function initializeQuiz() {
-            // Your existing initializeQuiz function remains unchanged
+    function initializeQuiz() {
+    terms = Object.keys(termsAndDefinitions);
+    shuffledTerms = shuffleArray(terms);
+    currentTermIndex = 0;
+    totalQuestions = terms.length; // Update totalQuestions
+    answeredQuestions = 0;
+    attempts = 0;
 
-            let terms = Object.keys(termsAndDefinitions);
-            let shuffledTerms = shuffleArray(terms);
-            let currentTermIndex = 0;
-            let totalQuestions = terms.length;
-            let answeredQuestions = 0;
-            let attempts = 0;
+    function askQuestion() {
+    const currentTerm = shuffledTerms[currentTermIndex];
+    const questionElement = document.getElementById('question');
 
-            // Rest of your initializeQuiz function remains unchanged
-        }
+    if (englishToJapaneseMode) {
+        questionElement.textContent = `What is the translation from '${currentTerm}'?`;
+    } else {
+        questionElement.textContent = `What is the translation to '${termsAndDefinitions[currentTerm]}'?`;
+    }
+
+    displayCounters();
+    document.getElementById('result-container').innerHTML = '';
+    document.getElementById('definition').value = '';
+}
 
 
-        function resetQuiz() {
-            terms = Object.keys(termsAndDefinitions);
-            shuffledTerms = shuffleArray(terms);
-            currentTermIndex = 0;
-            answeredQuestions = 0;
-            attempts = 0;
-            document.getElementById('success-message').style.display = 'none';
+function displayCounters() {
+    document.getElementById('progress').textContent = answeredQuestions;
+    document.getElementById('total').textContent = totalQuestions;
+}
+
+
+
+
+            function displaySuccessMessage() {
+                document.getElementById('success-message').style.display = 'block';
+            }
+
+            // Initial question
             askQuestion();
-        }
 
-        // Rest of your script remains unchanged
+            // Add event listener for the Enter key
+            document.getElementById('definition').addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    checkAnswer();
+                }
+            });
+        }
 
         // Call the fetchVocabulary function to start the process
         fetchVocabulary();
