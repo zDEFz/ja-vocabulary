@@ -78,7 +78,7 @@
 </head>
 
 <h1>Japanese Vocabulary Training - Write Mode</h1>
-<p>Mode: <span id="mode">English => Hiragana</span></p>
+<p>Mode: <span id="mode">English => Japanese</span></p>
 <button onclick="switchMode()">Switch Mode</button>
 <p>Write the translation based on the mode.</p>
 
@@ -120,12 +120,12 @@
         let currentTermIndex = 0;
         let totalQuestions = terms.length;
         let answeredQuestions = 0;
-        let englishToHiraganaMode = true;
+        let englishToJapaneseMode = true;
         let attempts = 0;
 
         function switchMode() {
-            englishToHiraganaMode = !englishToHiraganaMode;
-            document.getElementById('mode').textContent = englishToHiraganaMode ? 'English => Hiragana' : 'Hiragana => English';
+            englishToJapaneseMode = !englishToJapaneseMode;
+            document.getElementById('mode').textContent = englishToJapaneseMode ? 'English => Japanese' : 'Japanese => English';
             resetQuiz();
         }
 
@@ -143,7 +143,7 @@
             const currentTerm = shuffledTerms[currentTermIndex];
             const questionElement = document.getElementById('question');
 
-            if (englishToHiraganaMode) {
+            if (englishToJapaneseMode) {
                 questionElement.textContent = `What is the translation from '${currentTerm}'?`;
             } else {
                 questionElement.textContent = `What is the translation to '${termsAndDefinitions[currentTerm]}'?`;
@@ -158,7 +158,7 @@
             const userDefinition = document.getElementById('definition').value;
             let correctAnswer;
 
-            if (englishToHiraganaMode) {
+            if (englishToJapaneseMode) {
                 correctAnswer = termsAndDefinitions[shuffledTerms[currentTermIndex]].toLowerCase();
             } else {
                 correctAnswer = shuffledTerms[currentTermIndex].toLowerCase();
@@ -170,13 +170,13 @@
             const resultParagraph = document.createElement('p');
 
             if (isCorrect) {
-                resultParagraph.textContent = `Correct! Well done! The answer is: ${englishToHiraganaMode ? termsAndDefinitions[shuffledTerms[currentTermIndex]] : shuffledTerms[currentTermIndex]}`;
+                resultParagraph.textContent = `Correct! Well done! The answer is: ${englishToJapaneseMode ? termsAndDefinitions[shuffledTerms[currentTermIndex]] : shuffledTerms[currentTermIndex]}`;
                 resultParagraph.classList.add('correct-answer');
                 answeredQuestions++;
                 attempts = 0; // Reset attempts on correct answer
             } else {
                 attempts++;
-                resultParagraph.textContent = `Incorrect. Try again (${attempts} attempt${attempts > 1 ? 's' : ''}). The correct answer is: ${englishToHiraganaMode ? termsAndDefinitions[shuffledTerms[currentTermIndex]] : shuffledTerms[currentTermIndex]}`;
+                resultParagraph.textContent = `Incorrect. Try again (${attempts} attempt${attempts > 1 ? 's' : ''}). The correct answer is: ${englishToJapaneseMode ? termsAndDefinitions[shuffledTerms[currentTermIndex]] : shuffledTerms[currentTermIndex]}`;
                 resultParagraph.classList.add('incorrect-answer');
             }
 
