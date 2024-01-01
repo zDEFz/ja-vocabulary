@@ -79,7 +79,9 @@
 <body>
 
     <h1>Japanese Vocabulary Training - Write Mode</h1>
-    <p>Write the English romaji for the Hiragana</p>
+    <p>Mode: <span id="mode">English => Hiragana</span></p>
+    <button onclick="switchMode()">Switch Mode</button>
+    <p>Write the translation based on the mode.</p>
 
     <div>
         <p id="question"></p>
@@ -95,7 +97,6 @@
     <div id="success-message">Congratulations! You've answered all questions correctly!</div>
 
     <script>
-        // Predefined terms and their correct answers
         const termsAndDefinitions = {
             'airport': 'くうこう',
             'american person': 'あめりかじん',
@@ -150,97 +151,104 @@
         let currentTermIndex = 0;
         let totalQuestions = terms.length;
         let answeredQuestions = 0;
+        let englishToHiraganaMode = true;
+
+        function switchMode() {
+            englishToHiraganaMode = !englishToHiraganaMode;
+            document.getElementById('mode').textContent = englishToHiraganaMode ? 'English => Hiragana' : 'Hiragana => English';
+            resetQuiz();
+        }
+
+        function resetQuiz() {
+            terms = Object.keys(termsAndDefinitions);
+            shuffledTerms = shuffleArray(terms);
+            currentTermIndex = 0;
+            answeredQuestions = 0;
+            document.getElementById('success-message').style.display = 'none';
+            askQuestion();
+        }
 
         function askQuestion() {
-            // Get the current term
             const currentTerm = shuffledTerms[currentTermIndex];
-
-            // Display the question
             const questionElement = document.getElementById('question');
-            questionElement.textContent = `What is the English translation of '${currentTerm}'?`;
-
-            // Display the updated counters
+            questionElement.textContent = `What is the translation ${englishToHiraganaMode ? 'to' : 'from'} '${currentTerm}'?`;
             displayCounters();
-
-            // Clear result container and input field
             document.getElementById('result-container').innerHTML = '';
             document.getElementById('definition').value = '';
         }
 
         function checkAnswer() {
-            // Get user input
-            const userDefinition = document.getElementById('definition').value;
+    const userDefinition = document.getElementById('definition').value;
+    let correctAnswer;
 
-            // Check if the user's solution is correct (case-insensitive)
-            const isCorrect = termsAndDefinitions[shuffledTerms[currentTermIndex]].toLowerCase() === userDefinition.toLowerCase();
+    if (englishToHiraganaMode) {
+        correctAnswer = termsAndDefinitions[shuffledTerms[currentTermIndex]].toLowerCase();
+    } else {
+        correctAnswer = shuffledTerms[currentTermIndex].toLowerCase();
+    }
 
-            // Display the result
-            const resultContainer = document.getElementById('result-container');
-            const resultParagraph = document.createElement('p');
-            resultParagraph.textContent = isCorrect
-                ? `Correct! Well done! The answer is: ${termsAndDefinitions[shuffledTerms[currentTermIndex]]}`
-                : 'Incorrect. Try again.';
+    const isCorrect = userDefinition.toLowerCase() === correctAnswer;
 
-            // Apply green text to the correct answer
-            if (isCorrect) {
-                resultParagraph.classList.add('correct-answer');
-                // Update answered question count
-                answeredQuestions++;
-            }
+    const resultContainer = document.getElementById('result-container');
+    const resultParagraph = document.createElement('p');
+    resultParagraph.textContent = isCorrect
+        ? `Correct! Well done! The answer is: ${englishToHiraganaMode ? termsAndDefinitions[shuffledTerms[currentTermIndex]] : shuffledTerms[currentTermIndex]}`
+        : `Incorrect. Try again. The correct answer is: ${englishToHiraganaMode ? termsAndDefinitions[shuffledTerms[currentTermIndex]] : shuffledTerms[currentTermIndex]}`;
 
-            // Display the updated counters
-            displayCounters();
+    if (isCorrect) {
+        resultParagraph.classList.add('correct-answer');
+        answeredQuestions++;
+    }
 
-            // Append the result to the container
-            resultContainer.innerHTML = '';
-            resultContainer.appendChild(resultParagraph);
+    displayCounters();
+    resultContainer.innerHTML = '';
+    resultContainer.appendChild(resultParagraph);
 
-            // Ask a new question if the answer is correct; otherwise, keep asking the same question after a delay
-            if (isCorrect) {
-                // Move to the next term
-                currentTermIndex++;
-
-                // Check if all questions have been answered
-                if (currentTermIndex === totalQuestions) {
-                    displaySuccessMessage();
-                } else {
-                    setTimeout(askQuestion, 2000); // Wait for 2 seconds before asking the next question
-                }
-            }
+    if (isCorrect) {
+        currentTermIndex++;
+        if (currentTermIndex === totalQuestions) {
+            displaySuccessMessage();
+        } else {
+            setTimeout(askQuestion, 2000);
         }
+    }
+}
+
 
         function displayCounters() {
-            // Display the updated counters
             document.getElementById('progress').textContent = answeredQuestions;
             document.getElementById('total').textContent = totalQuestions;
         }
 
         function displaySuccessMessage() {
-            // Display the success message
             document.getElementById('success-message').style.display = 'block';
         }
 
-        // Initial question
-        askQuestion();
-
-        // Add event listener for the Enter key
-        document.getElementById('definition').addEventListener('keydown', function (event) {
-            if (event.key === 'Enter') {
-                checkAnswer();
-            }
-        });
-
-        // Function to shuffle an array
         function shuffleArray(array) {
             let currentIndex = array.length, randomIndex;
             while (currentIndex !== 0) {
                 randomIndex = Math.floor(Math.random() * currentIndex);
                 currentIndex--;
-
                 [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
             }
             return array;
         }
+
+        function askQuestion() {
+    const currentTerm = shuffledTerms[currentTermIndex];
+    const questionElement = document.getElementById('question');
+    
+    if (englishToHiraganaMode) {
+        questionElement.textContent = `What is the translation from '${currentTerm}'?`;
+    } else {
+        questionElement.textContent = `What is the translation to '${termsAndDefinitions[currentTerm]}'?`;
+    }
+
+    displayCounters();
+    document.getElementById('result-container').innerHTML = '';
+    document.getElementById('definition').value = '';
+}
+
     </script>
 
 </body>
