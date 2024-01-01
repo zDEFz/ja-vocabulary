@@ -171,49 +171,54 @@
         function askQuestion() {
             const currentTerm = shuffledTerms[currentTermIndex];
             const questionElement = document.getElementById('question');
-            questionElement.textContent = `What is the translation ${englishToHiraganaMode ? 'to' : 'from'} '${currentTerm}'?`;
+            
+            if (englishToHiraganaMode) {
+                questionElement.textContent = `What is the translation from '${currentTerm}'?`;
+            } else {
+                questionElement.textContent = `What is the translation to '${termsAndDefinitions[currentTerm]}'?`;
+            }
+
             displayCounters();
             document.getElementById('result-container').innerHTML = '';
             document.getElementById('definition').value = '';
         }
 
         function checkAnswer() {
-    const userDefinition = document.getElementById('definition').value;
-    let correctAnswer;
+            const userDefinition = document.getElementById('definition').value;
+            let correctAnswer;
 
-    if (englishToHiraganaMode) {
-        correctAnswer = termsAndDefinitions[shuffledTerms[currentTermIndex]].toLowerCase();
-    } else {
-        correctAnswer = shuffledTerms[currentTermIndex].toLowerCase();
-    }
+            if (englishToHiraganaMode) {
+                correctAnswer = termsAndDefinitions[shuffledTerms[currentTermIndex]].toLowerCase();
+            } else {
+                correctAnswer = shuffledTerms[currentTermIndex].toLowerCase();
+            }
 
-    const isCorrect = userDefinition.toLowerCase() === correctAnswer;
+            const isCorrect = userDefinition.toLowerCase() === correctAnswer;
 
-    const resultContainer = document.getElementById('result-container');
-    const resultParagraph = document.createElement('p');
-    resultParagraph.textContent = isCorrect
-        ? `Correct! Well done! The answer is: ${englishToHiraganaMode ? termsAndDefinitions[shuffledTerms[currentTermIndex]] : shuffledTerms[currentTermIndex]}`
-        : `Incorrect. Try again. The correct answer is: ${englishToHiraganaMode ? termsAndDefinitions[shuffledTerms[currentTermIndex]] : shuffledTerms[currentTermIndex]}`;
+            const resultContainer = document.getElementById('result-container');
+            const resultParagraph = document.createElement('p');
+            resultParagraph.textContent = isCorrect
+                ? `Correct! Well done! The answer is: ${englishToHiraganaMode ? termsAndDefinitions[shuffledTerms[currentTermIndex]] : shuffledTerms[currentTermIndex]}`
+                : `Incorrect. Try again. The correct answer is: ${englishToHiraganaMode ? termsAndDefinitions[shuffledTerms[currentTermIndex]] : shuffledTerms[currentTermIndex]}`;
 
-    if (isCorrect) {
-        resultParagraph.classList.add('correct-answer');
-        answeredQuestions++;
-    }
+            if (isCorrect) {
+                resultParagraph.classList.add('correct-answer');
+                answeredQuestions++;
+            }
 
-    displayCounters();
-    resultContainer.innerHTML = '';
-    resultContainer.appendChild(resultParagraph);
+            displayCounters();
+            resultContainer.innerHTML = '';
+            resultContainer.appendChild(resultParagraph);
 
-    if (isCorrect) {
-        currentTermIndex++;
-        if (currentTermIndex === totalQuestions) {
-            displaySuccessMessage();
-        } else {
-            setTimeout(askQuestion, 2000);
+            if (isCorrect) {
+                currentTermIndex++;
+                if (currentTermIndex === totalQuestions) {
+                    displaySuccessMessage();
+                } else {
+                    setTimeout(askQuestion, 2000);
+                }
+            }
         }
-    }
-}
-
 
         function displayCounters() {
             document.getElementById('progress').textContent = answeredQuestions;
@@ -234,20 +239,15 @@
             return array;
         }
 
-        function askQuestion() {
-    const currentTerm = shuffledTerms[currentTermIndex];
-    const questionElement = document.getElementById('question');
-    
-    if (englishToHiraganaMode) {
-        questionElement.textContent = `What is the translation from '${currentTerm}'?`;
-    } else {
-        questionElement.textContent = `What is the translation to '${termsAndDefinitions[currentTerm]}'?`;
-    }
+        // Initial question
+        askQuestion();
 
-    displayCounters();
-    document.getElementById('result-container').innerHTML = '';
-    document.getElementById('definition').value = '';
-}
+        // Add event listener for the Enter key
+        document.getElementById('definition').addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                checkAnswer();
+            }
+        });
 
     </script>
 
