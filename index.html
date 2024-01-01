@@ -79,7 +79,7 @@
     <h1>Japanese Vocabulary Training - Write Mode</h1>
     <label for="vocabularySelect">Select Vocabulary:</label>
     <select id="vocabularySelect" onchange="changeVocabulary()">
-        <option value="en-hiragana">Japanese (Hiragana)</option>
+        <option value="en-japanese">Japanese (Basic)</option>
         <option value="en-kanji">Japanese (Kanji)</option>
     </select>
     <button onclick="switchMode()">Switch Mode</button>
@@ -229,8 +229,8 @@
             fetchVocabulary(selectedVocabulary);
         }
 
-        // Call the fetchVocabulary function with the default vocabulary (en-hiragana)
-        fetchVocabulary('en-hiragana');
+        // Call the fetchVocabulary function with the default vocabulary (en-japanese)
+        fetchVocabulary('en-japanese');
     </script>
 </body>
 
